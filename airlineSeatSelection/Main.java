@@ -1,59 +1,153 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.*;
+import java.util.*;
 
-public class CurrencyConverter {
-    private static final String API_URL = "https://api.exchangerate-api.com/v4/latest/";
+class Passenger {
+    private String name;
+    private String seatNumber;
+
+    public Passenger(String name, String seatNumber) {
+        this.name = name;
+        this.seatNumber = seatNumber;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSeatNumber() {
+        return seatNumber;
+    }
+
+    public void setSeatNumber(String seatNumber) {
+        this.seatNumber = seatNumber;
+    }
+}
+
+class AirlineReservationSystem {
+    private List<Passenger> passengers;
+    private Map<String, Passenger> seatMap;
+    private static final String DATA_FILE = "passenger_records.txt";
+
+    public AirlineReservationSystem() {
+        passengers = new ArrayList<>();
+        seatMap = new HashMap<>();
+        loadPassengerRecords();
+    }
+
+    public void displayMenu() {
+        System.out.println("1. Reserve a seat");
+        System.out.println("2. Cancel a reservation");
+        System.out.println("3. Display passenger records");
+        System.out.println("4. Exit");
+    }
+
+    public void reserveSeat() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter passenger name:");
+        String name = scanner.nextLine();
+
+        System.out.println("Enter seat number:");
+        String seatNumber = scanner.nextLine();
+
+        if (seatMap.containsKey(seatNumber)) {
+            System.out.println("Seat " + seatNumber + " is already reserved.");
+        } else {
+            Passenger passenger = new Passenger(name, seatNumber);
+            passengers.add(passenger);
+            seatMap.put(seatNumber, passenger);
+            savePassengerRecords(); // Save passenger record to file
+            System.out.println("Reservation successful.");
+        }
+    }
+
+    public void cancelReservation() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter passenger name:");
+        String name = scanner.nextLine();
+
+        boolean found = false;
+        for (Passenger passenger : passengers) {
+            if (passenger.getName().equalsIgnoreCase(name)) {
+                String seatNumber = passenger.getSeatNumber();
+                passengers.remove(passenger);
+                seatMap.remove(seatNumber);
+                savePassengerRecords(); // Save passenger record to file
+                System.out.println("Reservation canceled for " + name + ".");
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            System.out.println("Passenger not found.");
+        }
+    }
+
+    public void displayPassengerRecords() {
+        if (passengers.isEmpty()) {
+            System.out.println("No passengers found.");
+        } else {
+            System.out.println("Passenger records:");
+            for (Passenger passenger : passengers) {
+                System.out.println("Name: " + passenger.getName() + ", Seat: " + passenger.getSeatNumber());
+            }
+        }
+    }
+
+    private void savePassengerRecords() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(DATA_FILE))) {
+            for (Passenger passenger : passengers) {
+                writer.println(passenger.getName() + "," + passenger.getSeatNumber());
+            }
+        } catch (IOException e) {
+            System.out.println("Error saving passenger records.");
+        }
+    }
+
+    private void loadPassengerRecords() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 2) {
+                    String name = parts[0];
+                    String seatNumber = parts[1];
+                    Passenger passenger = new Passenger(name, seatNumber);
+                    passengers.add(passenger);
+                    seatMap.put(seatNumber, passenger);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading passenger records.");
+        }
+    }
 
     public static void main(String[] args) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            System.out.println("Enter base currency code (e.g., USD):");
-            String baseCurrency = reader.readLine().toUpperCase();
+        AirlineReservationSystem system = new AirlineReservationSystem();
+        Scanner scanner = new Scanner(System.in);
 
-            System.out.println("Enter target currency code (e.g., EUR):");
-            String targetCurrency = reader.readLine().toUpperCase();
+        while (true) {
+            system.displayMenu();
+            System.out.println("Enter your choice:");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline character
 
-            System.out.println("Enter amount:");
-            double amount = Double.parseDouble(reader.readLine());
-
-            double convertedAmount = convertCurrency(baseCurrency, targetCurrency, amount);
-            System.out.printf("%.2f %s = %.2f %s", amount, baseCurrency, convertedAmount, targetCurrency);
-        } catch (IOException e) {
-            e.printStackTrace();
+            switch (choice) {
+                case 1:
+                    system.reserveSeat();
+                    break;
+                case 2:
+                    system.cancelReservation();
+                    break;
+                case 3:
+                    system.displayPassengerRecords();
+                    break;
+                case 4:
+                    System.out.println("Exiting program...");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
         }
-    }
-
-    public static double convertCurrency(String baseCurrency, String targetCurrency, double amount) throws IOException {
-        String apiUrl = API_URL + baseCurrency;
-        URL url = new URL(apiUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String response = reader.readLine();
-            reader.close();
-
-            // Parse the JSON response
-            double rate = parseExchangeRate(response, targetCurrency);
-            return amount * rate;
-        } else {
-            throw new IOException("Failed to retrieve exchange rate API data. Response code: " + responseCode);
-        }
-    }
-
-    private static double parseExchangeRate(String json, String targetCurrency) {
-        // Parse the JSON response to get the exchange rate for the target currency
-        // You can use a JSON parsing library like Gson or Jackson for a more robust implementation
-
-        // Example implementation with basic string manipulation (not recommended for production use)
-        String rateKey = "\"" + targetCurrency + "\":";
-        int rateIndex = json.indexOf(rateKey) + rateKey.length();
-        int endIndex = json.indexOf(",", rateIndex);
-        String rateString = json.substring(rateIndex, endIndex);
-        return Double.parseDouble(rateString);
     }
 }

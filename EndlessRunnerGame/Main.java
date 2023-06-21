@@ -2,12 +2,13 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-class EndlessRunnerGame extends JPanel implements ActionListener {
+public class EndlessRunnerGame extends JPanel implements ActionListener {
     private Timer timer;
     private int delay = 10;
 
     private int playerY; // Vertical position of the player
     private int playerHeight = 50;
+    private int playerWidth = 50;
     private boolean isJumping = false;
     private boolean isSliding = false;
 
@@ -30,7 +31,7 @@ class EndlessRunnerGame extends JPanel implements ActionListener {
                     resetGame();
                 } else if (e.getKeyCode() == KeyEvent.VK_SPACE && !isJumping) {
                     jump();
-                } else if (e.getKeyCode() == KeyEvent.VK_S && !isJumping) {
+                } else if (e.getKeyCode() == KeyEvent.VK_S && !isJumping && !isSliding) {
                     slide();
                 }
             }
@@ -82,11 +83,13 @@ class EndlessRunnerGame extends JPanel implements ActionListener {
     public void slide() {
         isSliding = true;
         playerHeight = 25;
+        playerY += 25; // Adjust player position during sliding
     }
 
     public void stopSliding() {
         isSliding = false;
         playerHeight = 50;
+        playerY -= 25; // Adjust player position after sliding stops
     }
 
     public void move() {
@@ -107,7 +110,7 @@ class EndlessRunnerGame extends JPanel implements ActionListener {
     }
 
     public void checkCollisions() {
-        Rectangle playerBounds = new Rectangle(100, playerY, 50, playerHeight);
+        Rectangle playerBounds = new Rectangle(100, playerY, playerWidth, playerHeight);
         Rectangle obstacleBounds = new Rectangle(obstacleX, obstacleY, obstacleWidth, 50);
 
         if (playerBounds.intersects(obstacleBounds)) {
@@ -129,12 +132,13 @@ class EndlessRunnerGame extends JPanel implements ActionListener {
         obstacleX = 800;
         playerY = 200;
         playerHeight = 50;
+        playerWidth = 50;
         timer.start();
     }
 
     public int getRandomVerticalPosition() {
-        int playerVerticalLevel = playerY + playerHeight / 2;
-        int[] options = { playerVerticalLevel, playerVerticalLevel - 75 };
+        int playerVerticalLevel = 200;
+        int[] options = { playerVerticalLevel, playerVerticalLevel - playerHeight / 2 };
         int randomIndex = (int) (Math.random() * options.length);
         return options[randomIndex];
     }
@@ -145,7 +149,7 @@ class EndlessRunnerGame extends JPanel implements ActionListener {
 
         // Draw player
         g.setColor(Color.WHITE);
-        g.fillRect(100, playerY, 50, playerHeight);
+        g.fillRect(100, playerY, playerWidth, playerHeight);
 
         // Draw obstacle
         g.setColor(Color.RED);

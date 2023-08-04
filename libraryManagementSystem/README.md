@@ -36,3 +36,5 @@ This program is written in Java and utilizes standard libraries for file I/O, da
 Contributions to this project are welcome! Feel free to submit issues, suggestions, or pull requests to help improve the Library Management System.
 
 Feel free to modify and expand upon this description to suit your project's specific details and requirements.
+
+![image](https://github.com/semihdursungul/java_projects/assets/114025283/45ad880b-61c7-4dcd-994d-86b2f6e35176)

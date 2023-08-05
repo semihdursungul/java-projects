@@ -7,7 +7,7 @@ import java.net.*;
 import org.json.*;
 
 class WeatherApp {
-    private static final String API_KEY = "149d7e13c17e14c8b7f450fbc036ddac";
+    private static final String API_KEY = "ENTER-YOUR-API-KEY-HERE";
     private static final String API_URL = "http://api.openweathermap.org/data/2.5/weather";
 
     private JFrame frame;

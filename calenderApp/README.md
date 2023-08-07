@@ -1,7 +1,6 @@
-![image](https://github.com/semihdursungul/java_projects/assets/114025283/b4a2b151-535e-4a89-95f1-e2ed0d32208c)
+![image](https://github.com/semihdursungul/java_projects/assets/114025283/031e6549-cc97-4694-89b7-373aed9d0291)
 
-
-**Interactive Calendar**
+**Calendar**
 
 The Interactive Calendar is a user-friendly Java GUI application that provides a convenient and intuitive way to explore and visualize the days of a month. 
 
